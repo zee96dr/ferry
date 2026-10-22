@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ferry | Move PDFs between computers</title>
+<meta name="description" content="Upload a PDF on one computer, open the same address on another, and download it. Private, passcode protected, no email needed.">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:title" content="Ferry | Move PDFs between computers">
+<meta property="og:description" content="Upload on one computer. Download on the other.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23000'/%3E%3Cpath d='M16 7v13M10 14l6-7 6 7M8 25h16' stroke='%23fff' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" defer></script>
+<script>document.documentElement.classList.add("js")</script>
+<style>
+:root{
+  --bg:#000000; --panel:#181818; --panel-2:#1F1F1F; --line:#272727; --line-2:#313131;
+  --text:#FFFFFF; --muted:#9B9B9B; --ok:#7EE2A8; --err:#FF8A8A;
+  --ease:cubic-bezier(0.32,0.72,0,1);
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px; --s-7:40px; --s-8:48px; --s-9:64px; --s-10:80px; --s-11:96px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:"Geist",system-ui,sans-serif;font-style:normal;font-size:16px;line-height:24px;text-wrap:pretty;-webkit-font-smoothing:antialiased}
+h1,h2,h3{text-wrap:balance;font-weight:600;letter-spacing:-0.02em}
+a{color:inherit}
+button,input{font:inherit;color:inherit}
+iconify-icon{display:inline-block;flex:none;font-size:20px}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.skip{position:absolute;left:var(--s-4);top:-80px;background:#fff;color:#000;padding:var(--s-2) var(--s-3);border-radius:8px;font-weight:600;z-index:50;transition:top 400ms var(--ease)}
+.skip:focus{top:var(--s-4)}
+.wrap{width:100%;max-width:1040px;margin:0 auto;padding:0 var(--s-5)}
+
+/* nav: floating pill */
+nav{position:fixed;top:var(--s-5);left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:var(--s-5);padding:var(--s-2) var(--s-2) var(--s-2) var(--s-4);border:1px solid var(--line-2);border-radius:9999px;background:rgba(0,0,0,.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);width:max-content;max-width:calc(100% - 32px)}
+.brand{display:flex;align-items:center;gap:var(--s-2);font-weight:600;text-decoration:none}
+nav .links{display:flex;gap:var(--s-1)}
+nav .links a{font-size:14px;line-height:20px;font-weight:600;text-decoration:none;color:var(--muted);padding:var(--s-1) var(--s-3);border-radius:9999px;transition:all 700ms var(--ease)}
+nav .links a:hover,nav .links a[aria-current="true"]{background:var(--line);color:#fff}
+
+/* hero */
+.hero{padding:var(--s-11) 0 var(--s-9);text-align:center}
+.hero h1{max-width:680px;margin:0 auto var(--s-4);font-size:60px;line-height:1;background:linear-gradient(90deg,#FFFFFF,#9B9B9B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{max-width:680px;margin:0 auto var(--s-7);font-size:18px;line-height:28px;color:var(--muted)}
+@media(max-width:640px){.hero h1{font-size:36px;line-height:40px}.hero{padding-top:80px}}
+
+/* vault */
+.vault{max-width:720px;margin:0 auto;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:var(--s-2)}
+.panel-in{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:var(--s-5)}
+.row{display:flex;align-items:center;gap:var(--s-3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);padding:var(--s-2) var(--s-3);min-height:40px;border-radius:8px;border:1px solid var(--line-2);background:transparent;font-size:16px;line-height:24px;font-weight:600;cursor:pointer;transition:all 700ms var(--ease)}
+.btn:hover{background:var(--line-2)}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:#fff;color:#000;border-color:#fff}
+.btn.primary:hover{background:#D9D9D9;border-color:#D9D9D9}
+.btn.sm{font-size:14px;line-height:20px;min-height:32px;padding:var(--s-1) var(--s-3)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+label.lbl{display:block;font-size:14px;line-height:20px;color:var(--muted);margin-bottom:var(--s-2)}
+.field{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line-2);border-radius:8px;padding:var(--s-2) var(--s-3);min-height:40px;transition:border-color 700ms var(--ease)}
+.field:hover{border-color:#4a4a4a}
+.msg{display:flex;align-items:center;gap:var(--s-2);font-size:14px;line-height:20px;margin-top:var(--s-3);min-height:20px}
+.msg.err{color:var(--err)} .msg.ok{color:var(--ok)}
+.note{font-size:14px;line-height:20px;color:var(--muted);margin-top:var(--s-3)}
+
+.drop{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--s-3);padding:var(--s-8) var(--s-4);border:1px dashed var(--line-2);border-radius:8px;background:var(--bg);transition:all 700ms var(--ease)}
+.drop.over{border-color:#fff;background:var(--panel);transform:scale(1.01)}
+.drop iconify-icon{font-size:32px}
+.drop strong{font-size:20px;line-height:28px;font-weight:600}
+.drop p{color:var(--muted);font-size:14px;line-height:20px}
+
+.listhead{display:flex;align-items:center;justify-content:space-between;margin:var(--s-5) var(--s-1) var(--s-3)}
+.listhead h2{font-size:18px;line-height:28px;letter-spacing:0}
+.list{list-style:none;display:grid;gap:var(--s-2)}
+.item{display:flex;align-items:center;gap:var(--s-3);padding:var(--s-3);background:var(--bg);border:1px solid var(--line);border-radius:8px}
+.item .ic{display:grid;place-items:center;width:40px;height:40px;border-radius:6px;background:var(--panel-2)}
+.item .meta{flex:1;min-width:0}
+.item .name{font-weight:500;overflow-wrap:anywhere}
+.item .sub2{font-size:12px;line-height:16px;color:var(--muted)}
+.item .acts{display:flex;gap:var(--s-2);flex-wrap:wrap;justify-content:flex-end}
+.bar{height:4px;background:var(--line);border-radius:9999px;margin-top:var(--s-2);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#fff;transition:width 700ms var(--ease)}
+.empty{padding:var(--s-7) var(--s-4);text-align:center;color:var(--muted);border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.empty strong{display:block;color:var(--text);font-size:16px;margin-bottom:var(--s-1)}
+.skel{height:64px;border-radius:8px;border:1px solid var(--line);background:var(--bg);position:relative;overflow:hidden}
+.skel::after{content:"";position:absolute;inset:var(--s-3);width:40px;border-radius:6px;background:var(--panel-2)}
+@media(prefers-reduced-motion:no-preference){.skel{animation:pulse 1600ms var(--ease) infinite}}
+@keyframes pulse{50%{opacity:.5}}
+.hidden{display:none!important}
+@media(max-width:640px){.item{flex-wrap:wrap}.item .acts{width:100%;justify-content:flex-start}}
+
+/* sections */
+section.block{padding:var(--s-10) 0}
+.tag{padding:var(--s-11) 0}
+.tag p{max-width:680px;font-size:48px;line-height:1;font-weight:600;letter-spacing:-0.02em;text-wrap:balance}
+.js .tag .w{opacity:.3;transition:opacity 700ms var(--ease)}
+.js .tag .w.on{opacity:1}
+@media(max-width:640px){.tag p{font-size:30px;line-height:36px}}
+h2.sec{font-size:36px;line-height:40px;margin-bottom:var(--s-6);max-width:680px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-4);list-style:none}
+.step{padding:var(--s-5);border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.step b{display:block;font-size:14px;line-height:20px;color:var(--muted);font-weight:500;margin-bottom:var(--s-3)}
+.step h3{font-size:20px;line-height:28px;margin-bottom:var(--s-2);letter-spacing:0}
+.step p{color:var(--muted)}
+@media(max-width:800px){.steps{grid-template-columns:1fr}}
+.faq{max-width:720px;display:grid;gap:var(--s-2)}
+details{border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:var(--s-4);padding:var(--s-4);font-weight:500;border-radius:8px}
+summary::-webkit-details-marker{display:none}
+summary iconify-icon{transition:transform 700ms var(--ease)}
+details[open] summary iconify-icon{transform:rotate(45deg)}
+details p{padding:0 var(--s-4) var(--s-4);color:var(--muted)}
+footer{border-top:1px solid var(--line);padding:var(--s-7) 0;color:var(--muted);font-size:14px;line-height:20px}
+footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap:wrap}
+
+/* scroll reveal */
+.js .reveal{opacity:0;transform:translateY(64px);filter:blur(12px);transition:all 900ms var(--ease)}
+.js .reveal.in{opacity:1;transform:none;filter:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .reveal{opacity:1;transform:none;filter:none;transition:none}
+  .js .tag .w{opacity:1;transition:none}
+  *{transition-duration:1ms!important;animation:none!important}
+}
+@media(prefers-reduced-transparency:reduce){nav{background:#000;backdrop-filter:none;-webkit-backdrop-filter:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav aria-label="Primary">
+  <a class="brand" href="#top"><iconify-icon icon="ph:boat" aria-hidden="true"></iconify-icon>Ferry</a>
+  <div class="links">
+    <a href="#how">How it works</a>
+    <a href="#faq">FAQ</a>
+  </div>
+</nav>
+
+<main id="main">
+  <header class="hero" id="top">
+    <div class="wrap">
+      <h1 class="reveal">Upload a PDF here.<br>Download it over there.</h1>
+      <p class="sub reveal">Ferry holds your files for you. Drop them in on one computer, open this same address on another, and save them with one click.</p>
+
+      <div class="vault reveal" id="vault">
+        <!-- gate -->
+        <div class="panel-in" id="gate">
+          <form id="gateForm" novalidate>
+            <label class="lbl" for="pass">Passcode</label>
+            <div class="row">
+              <input class="field" id="pass" type="password" autocomplete="current-password" placeholder="Enter your passcode" required>
+              <button class="btn primary" type="submit" id="unlockBtn"><iconify-icon icon="ph:lock-key-open" aria-hidden="true"></iconify-icon>Unlock</button>
+            </div>
+            <p class="msg" id="gateMsg" role="alert"></p>
+            <p class="note">The passcode is the one you set as VAULT_PASSCODE in Netlify. Use the same one on both computers.</p>
+          </form>
+        </div>
+
+        <!-- app -->
+        <div id="app" class="hidden">
+          <div class="drop" id="drop">
+            <iconify-icon icon="ph:upload-simple" aria-hidden="true"></iconify-icon>
+            <strong>Drop PDFs here</strong>
+            <p>Up to 200 MB per file. Several files at once is fine.</p>
+            <button class="btn primary" type="button" id="pick">Choose PDFs</button>
+            <input type="file" id="file" accept="application/pdf,.pdf" multiple class="hidden" aria-label="Choose PDF files">
+          </div>
+          <p class="msg" id="appMsg" role="status" style="padding:0 var(--s-2)"></p>
+
+          <div class="listhead">
+            <h2>Waiting for download</h2>
+            <div class="row" style="gap:var(--s-2)">
+              <button class="btn sm" type="button" id="refresh"><iconify-icon icon="ph:arrows-clockwise" aria-hidden="true" style="font-size:16px"></iconify-icon>Refresh</button>
+              <button class="btn sm" type="button" id="lock"><iconify-icon icon="ph:lock-key" aria-hidden="true" style="font-size:16px"></iconify-icon>Lock</button>
+            </div>
+          </div>
+          <ul class="list" id="list" aria-live="polite"></ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="tag" aria-label="Tagline">
+    <div class="wrap">
+      <p id="tagline">Your PDF leaves one computer and lands on the next. No email to yourself, no flash drive, no chat app in between.</p>
+    </div>
+  </section>
+
+  <section class="block" id="how">
+    <div class="wrap">
+      <h2 class="sec reveal">Three steps, two computers</h2>
+      <ol class="steps">
+        <li class="step reveal"><b>Step 1</b><h3>Upload on the first computer</h3><p>Unlock with your passcode and drop in the PDFs you want to move.</p></li>
+        <li class="step reveal"><b>Step 2</b><h3>Open the site on the second</h3><p>Visit the same address and enter the same passcode. Your files are already listed.</p></li>
+        <li class="step reveal"><b>Step 3</b><h3>Download, then delete</h3><p>Save each file to Downloads. Press Delete when you are done so nothing stays behind.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="faq">
+    <div class="wrap">
+      <h2 class="sec reveal">Questions you might have</h2>
+      <div class="faq reveal">
+        <details><summary>Who can see my files?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Only someone who has the address and the passcode. The files sit in your own Netlify storage, not on a shared service.</p></details>
+        <details><summary>How large can a file be?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Up to 200 MB each. Ferry splits big files into 4 MB pieces while uploading and joins them again on download.</p></details>
+        <details><summary>Does it only work with PDFs?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>The picker is set to PDFs. Other file types are skipped with a message.</p></details>
+        <details><summary>How long do files stay?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Until you press Delete. Ferry does not remove anything by itself.</p></details>
+        <details><summary>I forgot the passcode. What now?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Open your site settings in Netlify, check the VAULT_PASSCODE variable, or set a new one and redeploy.</p></details>
+        <details><summary>The upload stopped halfway.<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Check your connection and upload the file again. Half finished uploads never show up in the list.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Ferry. A private file bridge for your own computers.</span>
+    <a href="#top">Back to top</a>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const CHUNK = 4 * 1024 * 1024;
+  const MAX = 200 * 1024 * 1024;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let pass = "";
+  try { pass = sessionStorage.getItem("ferry.pass") || ""; } catch {}
+
+  /* reveal on scroll */
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+  }), { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((el, i) => {
+    el.style.transitionDelay = el.closest(".hero") ? (i * 100) + "ms" : "0ms";
+    io.observe(el);
+  });
+
+  /* tagline: word by word */
+  const tl = $("#tagline");
+  const words = tl.textContent.trim().split(/\s+/);
+  tl.setAttribute("aria-label", words.join(" "));
+  tl.innerHTML = words.map((w) => `<span class="w" aria-hidden="true">${w}</span>`).join(" ");
+  const wio = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add("on"); wio.unobserve(e.target); }
+  }), { rootMargin: "0px 0px -35% 0px" });
+  tl.querySelectorAll(".w").forEach((w) => reduce ? w.classList.add("on") : wio.observe(w));
+
+  /* nav current section */
+  const links = [...document.querySelectorAll("nav .links a")];
+  const sio = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) links.forEach((a) => a.setAttribute("aria-current", String(a.getAttribute("href") === "#" + e.target.id)));
+  }), { rootMargin: "-45% 0px -50% 0px" });
+  ["how", "faq"].forEach((id) => sio.observe(document.getElementById(id)));
+
+  /* helpers */
+  const icon = (n) => `<iconify-icon icon="ph:${n}" aria-hidden="true"></iconify-icon>`;
+  const say = (el, kind, text, ic) => { el.className = "msg " + (kind || ""); el.innerHTML = text ? icon(ic || (kind === "err" ? "warning-circle" : "check-circle")) + "<span></span>" : ""; if (text) el.querySelector("span").textContent = text; };
+  const fmt = (b) => b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + " KB" : (b / 1024 / 1024).toFixed(1) + " MB";
+  const when = (t) => new Date(t).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+
+  class AuthError extends Error {}
+  async function api(path, opts = {}) {
+    const r = await fetch("/api" + path, { ...opts, headers: { "x-passcode": pass, ...(opts.headers || {}) } });
+    if (r.status === 401) throw new AuthError("Wrong passcode.");
+    if (!r.ok) {
+      let m = "Request failed. Please try again.";
+      try { m = (await r.json()).error || m; } catch {}
+      throw new Error(m);
+    }
+    return r;
+  }
+
+  /* gate */
+  const gate = $("#gate"), app = $("#app"), gateMsg = $("#gateMsg"), appMsg = $("#appMsg");
+  function showApp() { gate.classList.add("hidden"); app.classList.remove("hidden"); loadList(true); }
+  function showGate(msg) { app.classList.add("hidden"); gate.classList.remove("hidden"); say(gateMsg, "err", msg); }
+
+  $("#gateForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const v = $("#pass").value.trim();
+    if (!v) { say(gateMsg, "err", "Enter your passcode."); $("#pass").focus(); return; }
+    pass = v;
+    const btn = $("#unlockBtn"); btn.disabled = true; say(gateMsg, "", "");
+    try {
+      await api("/files");
+      try { sessionStorage.setItem("ferry.pass", pass); } catch {}
+      $("#pass").value = "";
+      showApp();
+    } catch (err) {
+      pass = "";
+      say(gateMsg, "err", err.message);
+    } finally { btn.disabled = false; }
+  });
+
+  $("#lock").addEventListener("click", () => {
+    pass = ""; try { sessionStorage.removeItem("ferry.pass"); } catch {}
+    say(appMsg, "", ""); showGate("");
+  });
+
+  /* list */
+  const list = $("#list");
+  async function loadList(first) {
+    if (first) list.innerHTML = '<li class="skel"></li><li class="skel"></li>';
+    try {
+      const { files } = await (await api("/files")).json();
+      render(files);
+    } catch (err) {
+      if (err instanceof AuthError) return showGate("Session expired. Enter the passcode again.");
+      list.innerHTML = "";
+      say(appMsg, "err", err.message);
+    }
+  }
+  function render(files) {
+    if (!files.length) {
+      list.innerHTML = '<li class="empty"><strong>Nothing here yet</strong>Upload a PDF on this computer, then open Ferry on the other one.</li>';
+      return;
+    }
+    list.innerHTML = "";
+    files.forEach((f) => list.appendChild(row(f)));
+  }
+  function row(f) {
+    const li = document.createElement("li");
+    li.className = "item";
+    li.innerHTML = `<span class="ic">${icon("file-pdf")}</span>
+      <div class="meta"><div class="name"></div><div class="sub2"></div><div class="bar hidden"><i></i></div></div>
+      <div class="acts"><button class="btn sm primary dl" type="button">${icon("download-simple")}<span>Download</span></button>
+      <button class="btn sm del" type="button">${icon("trash")}<span>Delete</span></button></div>`;
+    li.querySelector(".name").textContent = f.name;
+    li.querySelector(".sub2").textContent = fmt(f.size) + " · " + when(f.created);
+    const dl = li.querySelector(".dl"), del = li.querySelector(".del"), bar = li.querySelector(".bar"), fill = bar.querySelector("i");
+    dl.addEventListener("click", async () => {
+      dl.disabled = true; bar.classList.remove("hidden"); say(appMsg, "", "");
+      try {
+        const parts = [];
+        for (let i = 0; i < f.chunks; i++) {
+          parts.push(await (await api(`/files/${f.id}/chunks/${i}`)).arrayBuffer());
+          fill.style.width = Math.round(((i + 1) / f.chunks) * 100) + "%";
+          dl.querySelector("span").textContent = Math.round(((i + 1) / f.chunks) * 100) + "%";
+        }
+        const url = URL.createObjectURL(new Blob(parts, { type: "application/pdf" }));
+        const a = Object.assign(document.createElement("a"), { href: url, download: f.name });
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        say(appMsg, "ok", f.name + " saved to your downloads.");
+      } catch (err) {
+        if (err instanceof AuthError) return showGate("Session expired. Enter the passcode again.");
+        say(appMsg, "err", "Download failed. " + err.message);
+      } finally { dl.disabled = false; dl.querySelector("span").textContent = "Download"; bar.classList.add("hidden"); fill.style.width = "0"; }
+    });
+    let armed = 0;
+    del.addEventListener("click", async () => {
+      if (!armed) {
+        armed = setTimeout(() => { armed = 0; del.querySelector("span").textContent = "Delete"; }, 3500);
+        del.querySelector("span").textContent = "Confirm delete";
+        return;
+      }
+      clearTimeout(armed); del.disabled = true;
+      try { await api(`/files/${f.id}`, { method: "DELETE" }); li.remove(); if (!list.children.length) render([]); say(appMsg, "ok", f.name + " deleted."); }
+      catch (err) { del.disabled = false; armed = 0; del.querySelector("span").textContent = "Delete"; say(appMsg, "err", "Delete failed. " + err.message); }
+    });
+    return li;
+  }
+
+  /* upload */
+  const drop = $("#drop"), input = $("#file");
+  $("#pick").addEventListener("click", () => input.click());
+  input.addEventListener("change", () => { upload([...input.files]); input.value = ""; });
+  ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", (e) => upload([...e.dataTransfer.files]));
+  $("#refresh").addEventListener("click", () => loadList(false));
+  addEventListener("focus", () => { if (pass && !app.classList.contains("hidden")) loadList(false); });
+
+  async function upload(files) {
+    const skipped = files.filter((f) => !(f.type === "application/pdf" || /\.pdf$/i.test(f.name)));
+    const big = files.filter((f) => f.size > MAX);
+    const ok = files.filter((f) => !skipped.includes(f) && !big.includes(f) && f.size > 0);
+    if (skipped.length || big.length) say(appMsg, "err", `${skipped.length + big.length} file(s) skipped. Only PDFs up to 200 MB are accepted.`);
+    for (const f of ok) {
+      const li = document.createElement("li");
+      li.className = "item";
+      li.innerHTML = `<span class="ic">${icon("file-pdf")}</span><div class="meta"><div class="name"></div><div class="sub2">Uploading…</div><div class="bar"><i></i></div></div>`;
+      li.querySelector(".name").textContent = f.name;
+      const empty = list.querySelector(".empty, .skel"); if (empty) list.innerHTML = "";
+      list.prepend(li);
+      const fill = li.querySelector("i"), sub = li.querySelector(".sub2");
+      try {
+        const n = Math.ceil(f.size / CHUNK);
+        const { id } = await (await api("/files", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: f.name, size: f.size, chunks: n }) })).json();
+        for (let i = 0; i < n; i++) {
+          await api(`/files/${id}/chunks/${i}`, { method: "PUT", body: f.slice(i * CHUNK, (i + 1) * CHUNK) });
+          fill.style.width = Math.round(((i + 1) / n) * 100) + "%";
+        }
+        await api(`/files/${id}/complete`, { method: "POST" });
+        say(appMsg, "ok", f.name + " is ready to download on your other computer.");
+      } catch (err) {
+        li.remove();
+        if (err instanceof AuthError) return showGate("Session expired. Enter the passcode again.");
+        say(appMsg, "err", `Could not upload ${f.name}. ${err.message}`);
+      }
+    }
+    loadList(false);
+  }
+
+  if (pass) { api("/files").then(showApp).catch(() => { pass = ""; }); }
+})();
+</script>
+</body>
+</html>
