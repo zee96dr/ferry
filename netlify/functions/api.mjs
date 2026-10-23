@@ -3,14 +3,6 @@ import { getStore } from "@netlify/blobs";
 export const config = { path: "/api/*" };
 
 const MAX_CHUNKS = 50; // 50 x 4 MB = 200 MB per file
-const AGENT_ONLINE_MS = 15000;
-
-const PAPERS = ["A4", "A3", "A5", "Letter", "Legal"];
-const PAPER_TYPES = ["plain", "photo", "glossy", "card"];
-const COLORS = ["color", "mono"];
-const SIDES = ["single", "duplex_long", "duplex_short"];
-const STATUSES = ["queued", "printing", "done", "failed"];
-
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
@@ -27,92 +19,12 @@ export default async (req) => {
   }
 
   const store = getStore("ferry");
-  const url = new URL(req.url);
-  const parts = url.pathname.replace(/^\/api\/?/, "").split("/").filter(Boolean);
+  const parts = new URL(req.url).pathname.replace(/^\/api\/?/, "").split("/").filter(Boolean);
   const method = req.method;
-  const [root, id, sub, n] = parts;
 
-  const readBody = async () => { try { return await req.json(); } catch { return null; } };
+  if (parts[0] !== "files") return json({ error: "Not found." }, 404);
 
-  /* ---------- agent ---------- */
-  if (root === "agent" && id === "ping" && method === "POST") {
-    const b = (await readBody()) || {};
-    await store.setJSON("agent/last", {
-      name: String(b.name || "Print computer").slice(0, 60),
-      printer: String(b.printer || "Default printer").slice(0, 80),
-      seen: Date.now(),
-    });
-    return json({ ok: true });
-  }
-
-  /* ---------- print jobs ---------- */
-  if (root === "jobs") {
-    // GET /api/jobs
-    if (!id && method === "GET") {
-      const { blobs } = await store.list({ prefix: "job/" });
-      const all = await Promise.all(blobs.map((b) => store.get(b.key, { type: "json" })));
-      const jobs = all.filter(Boolean).sort((a, b) => b.created - a.created).slice(0, 40);
-      const last = await store.get("agent/last", { type: "json" });
-      const agent = last
-        ? { online: Date.now() - last.seen < AGENT_ONLINE_MS, name: last.name, printer: last.printer, seen: last.seen }
-        : { online: false };
-      return json({ jobs, agent });
-    }
-
-    // POST /api/jobs
-    if (!id && method === "POST") {
-      const b = await readBody();
-      if (!b) return json({ error: "Bad request." }, 400);
-      const meta = await store.get(`meta/${String(b.fileId)}`, { type: "json" });
-      if (!meta || !meta.complete) return json({ error: "File not found." }, 404);
-      const copies = Number(b.copies);
-      const pages = String(b.pages || "").replace(/\s+/g, "");
-      if (!Number.isInteger(copies) || copies < 1 || copies > 99) return json({ error: "Copies must be 1 to 99." }, 400);
-      if (!PAPERS.includes(b.paper) || !PAPER_TYPES.includes(b.paperType) || !COLORS.includes(b.color) || !SIDES.includes(b.sides)) {
-        return json({ error: "Invalid print options." }, 400);
-      }
-      if (pages && !/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(pages)) return json({ error: "Page range looks wrong. Use 1-3,5." }, 400);
-      const jobId = crypto.randomUUID();
-      const job = {
-        id: jobId, fileId: meta.id, fileName: meta.name, copies, paper: b.paper, paperType: b.paperType,
-        color: b.color, sides: b.sides, pages, status: "queued", message: "", created: Date.now(), updated: Date.now(),
-      };
-      await store.setJSON(`job/${jobId}`, job);
-      return json({ job });
-    }
-
-    // DELETE /api/jobs  (clear finished)
-    if (!id && method === "DELETE") {
-      const { blobs } = await store.list({ prefix: "job/" });
-      for (const bl of blobs) {
-        const j = await store.get(bl.key, { type: "json" });
-        if (j && (j.status === "done" || j.status === "failed")) await store.delete(bl.key);
-      }
-      return json({ ok: true });
-    }
-
-    const job = id ? await store.get(`job/${id}`, { type: "json" }) : null;
-    if (!job) return json({ error: "Job not found." }, 404);
-
-    // POST /api/jobs/:id/status
-    if (sub === "status" && method === "POST") {
-      const b = await readBody();
-      if (!b || !STATUSES.includes(b.status)) return json({ error: "Bad status." }, 400);
-      await store.setJSON(`job/${id}`, { ...job, status: b.status, message: String(b.message || "").slice(0, 300), updated: Date.now() });
-      return json({ ok: true });
-    }
-
-    // DELETE /api/jobs/:id
-    if (!sub && method === "DELETE") {
-      await store.delete(`job/${id}`);
-      return json({ ok: true });
-    }
-
-    return json({ error: "Not found." }, 404);
-  }
-
-  /* ---------- files ---------- */
-  if (root !== "files") return json({ error: "Not found." }, 404);
+  const [, id, sub, n] = parts;
 
   // GET /api/files
   if (!id && method === "GET") {
@@ -124,8 +36,8 @@ export default async (req) => {
 
   // POST /api/files  { name, size, chunks }
   if (!id && method === "POST") {
-    const body = await readBody();
-    if (!body) return json({ error: "Bad request." }, 400);
+    let body;
+    try { body = await req.json(); } catch { return json({ error: "Bad request." }, 400); }
     const name = String(body.name || "").replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").slice(0, 200);
     const size = Number(body.size);
     const chunks = Number(body.chunks);
