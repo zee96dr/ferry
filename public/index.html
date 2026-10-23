@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ferry | Send PDFs to another computer and print them</title>
-<meta name="description" content="Upload a PDF on one computer, then download it or print it on another. Set copies, paper size, color and sides from one screen.">
+<title>Ferry | Upload at home, print at any shop</title>
+<meta name="description" content="Upload PDFs on one computer, open Ferry on any shop computer, set copies, paper size, color and sides, and print. Nothing to install.">
 <meta name="robots" content="noindex, nofollow">
-<meta property="og:title" content="Ferry | Send PDFs to another computer and print them">
-<meta property="og:description" content="Upload on one computer. Print on the other.">
+<meta property="og:title" content="Ferry | Upload at home, print at any shop">
+<meta property="og:description" content="Your PDFs, ready to print on any computer.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#000000">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23000'/%3E%3Cpath d='M16 7v13M10 14l6-7 6 7M8 25h16' stroke='%23fff' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 <script>document.documentElement.classList.add("js")</script>
 <style>
 :root{
@@ -36,20 +37,17 @@ iconify-icon{display:inline-block;flex:none;font-size:20px}
 .wrap{width:100%;max-width:1040px;margin:0 auto;padding:0 var(--s-5)}
 .hidden{display:none!important}
 
-/* nav */
 nav{position:fixed;top:var(--s-5);left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:var(--s-5);padding:var(--s-2) var(--s-2) var(--s-2) var(--s-4);border:1px solid var(--line-2);border-radius:9999px;background:rgba(0,0,0,.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);width:max-content;max-width:calc(100% - 32px)}
 .brand{display:flex;align-items:center;gap:var(--s-2);font-weight:600;text-decoration:none}
 nav .links{display:flex;gap:var(--s-1)}
 nav .links a{font-size:14px;line-height:20px;font-weight:600;text-decoration:none;color:var(--muted);padding:var(--s-1) var(--s-3);border-radius:9999px;transition:all 700ms var(--ease)}
 nav .links a:hover,nav .links a[aria-current="true"]{background:var(--line);color:#fff}
 
-/* hero */
 .hero{padding:var(--s-11) 0 var(--s-9);text-align:center}
 .hero h1{max-width:680px;margin:0 auto var(--s-4);font-size:60px;line-height:1;background:linear-gradient(90deg,#FFFFFF,#9B9B9B);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero .sub{max-width:680px;margin:0 auto var(--s-7);font-size:18px;line-height:28px;color:var(--muted)}
 @media(max-width:640px){.hero h1{font-size:36px;line-height:40px}.hero{padding-top:80px}}
 
-/* vault */
 .vault{max-width:720px;margin:0 auto;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:var(--s-2)}
 .panel-in{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:var(--s-5)}
 .row{display:flex;align-items:center;gap:var(--s-3)}
@@ -63,20 +61,9 @@ nav .links a:hover,nav .links a[aria-current="true"]{background:var(--line);colo
 label.lbl,legend.lbl{display:block;font-size:14px;line-height:20px;color:var(--muted);margin-bottom:var(--s-2);padding:0}
 .field{width:100%;min-width:0;background:var(--bg);border:1px solid var(--line-2);border-radius:8px;padding:var(--s-2) var(--s-3);min-height:40px;transition:border-color 700ms var(--ease)}
 .field:hover{border-color:#4a4a4a}
-select.field{appearance:none;-webkit-appearance:none;cursor:pointer}
 .msg{display:flex;align-items:center;gap:var(--s-2);font-size:14px;line-height:20px;margin-top:var(--s-3);min-height:20px}
 .msg.err{color:var(--err)} .msg.ok{color:var(--ok)}
 .note{font-size:14px;line-height:20px;color:var(--muted);margin-top:var(--s-3)}
-
-/* tabs + agent */
-.top{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3);flex-wrap:wrap;padding:var(--s-1) var(--s-1) var(--s-3)}
-.tabs{display:flex;gap:var(--s-1);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:var(--s-1)}
-.tab{display:inline-flex;align-items:center;gap:var(--s-2);font-size:14px;line-height:20px;font-weight:600;padding:var(--s-1) var(--s-3);border-radius:6px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:all 700ms var(--ease)}
-.tab[aria-selected="true"]{background:var(--line-2);color:#fff}
-.agent{display:inline-flex;align-items:center;gap:var(--s-2);font-size:12px;line-height:16px;color:var(--muted)}
-.agent i{width:8px;height:8px;border-radius:9999px;background:#6b6b6b}
-.agent.on i{background:var(--ok)}
-.agent.on{color:var(--text)}
 
 .drop{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--s-3);padding:var(--s-8) var(--s-4);border:1px dashed var(--line-2);border-radius:8px;background:var(--bg);transition:all 700ms var(--ease)}
 .drop.over{border-color:#fff;background:var(--panel);transform:scale(1.01)}
@@ -93,9 +80,6 @@ select.field{appearance:none;-webkit-appearance:none;cursor:pointer}
 .item .name{font-weight:500;overflow-wrap:anywhere}
 .item .sub2{font-size:12px;line-height:16px;color:var(--muted)}
 .item .acts{display:flex;gap:var(--s-2);flex-wrap:wrap;justify-content:flex-end}
-.pill{display:inline-flex;align-items:center;gap:var(--s-1);font-size:12px;line-height:16px;font-weight:600;margin-top:var(--s-1)}
-.pill iconify-icon{font-size:16px}
-.pill.queued{color:var(--warn)} .pill.printing{color:#fff} .pill.done{color:var(--ok)} .pill.failed{color:var(--err)}
 .bar{height:4px;background:var(--line);border-radius:9999px;margin-top:var(--s-2);overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:#fff;transition:width 700ms var(--ease)}
 .empty{padding:var(--s-7) var(--s-4);text-align:center;color:var(--muted);border:1px solid var(--line);border-radius:8px;background:var(--bg)}
@@ -106,22 +90,27 @@ select.field{appearance:none;-webkit-appearance:none;cursor:pointer}
 @keyframes pulse{50%{opacity:.5}}
 @media(max-width:640px){.item{flex-wrap:wrap}.item .acts{width:100%;justify-content:flex-start}}
 
-/* print dialog */
-dialog{margin:auto;width:min(560px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;background:var(--panel);color:var(--text);border:1px solid var(--line-2);border-radius:16px;padding:var(--s-2)}
+/* print studio */
+dialog{margin:auto;width:min(1100px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;background:var(--panel);color:var(--text);border:1px solid var(--line-2);border-radius:16px;padding:var(--s-2)}
 dialog::backdrop{background:rgba(0,0,0,.8);backdrop-filter:blur(8px)}
 dialog[open]{animation:dlg 700ms var(--ease)}
 @keyframes dlg{from{opacity:0;transform:translateY(24px) scale(.98)}}
-.dlg-in{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:var(--s-5);display:grid;gap:var(--s-5)}
-.dlg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s-3)}
-.dlg-head h2{font-size:24px;line-height:32px}
-.dlg-head p{font-size:14px;line-height:20px;color:var(--muted);overflow-wrap:anywhere}
+.st-in{background:var(--panel-2);border:1px solid var(--line);border-radius:8px}
+.st-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s-3);padding:var(--s-5) var(--s-5) var(--s-4)}
+.st-head h2{font-size:24px;line-height:32px}
+.st-head p{font-size:14px;line-height:20px;color:var(--muted);overflow-wrap:anywhere}
+.st-body{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:var(--s-5);padding:0 var(--s-5) var(--s-5)}
+@media(max-width:860px){.st-body{grid-template-columns:1fr}}
+.prep{display:flex;flex-direction:column;gap:var(--s-1);font-size:14px;line-height:20px;color:var(--muted);margin-bottom:var(--s-3)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--s-3);align-items:end}
+.pcell figcaption{font-size:12px;line-height:16px;color:var(--muted);margin-top:var(--s-1);text-align:center}
+.st-set{display:grid;gap:var(--s-4);align-content:start}
 fieldset{border:0;min-width:0}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-4)}
-@media(max-width:520px){.grid2{grid-template-columns:1fr}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-3)}
 .seg{display:flex;flex-wrap:wrap;gap:var(--s-1);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:var(--s-1)}
 .seg label{position:relative;flex:1;min-width:max-content}
 .seg input{position:absolute;opacity:0;inset:0;cursor:pointer}
-.seg span{display:flex;align-items:center;justify-content:center;gap:var(--s-2);text-align:center;font-size:14px;line-height:20px;font-weight:600;padding:var(--s-2) var(--s-3);border-radius:6px;color:var(--muted);transition:all 700ms var(--ease)}
+.seg span{display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;line-height:20px;font-weight:600;padding:var(--s-2) var(--s-3);border-radius:6px;color:var(--muted);transition:all 700ms var(--ease)}
 .seg input:checked + span{background:#fff;color:#000}
 .seg input:focus-visible + span{outline:2px solid #fff;outline-offset:2px}
 .seg input:not(:checked):hover + span{background:var(--line)}
@@ -130,12 +119,30 @@ fieldset{border:0;min-width:0}
 .stepper .btn{width:40px;padding:0}
 .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .stepper input{-moz-appearance:textfield}
-.summary{display:flex;gap:var(--s-2);align-items:center;font-size:14px;line-height:20px;padding:var(--s-3);border:1px solid var(--line-2);border-radius:6px;background:var(--bg)}
-.warnbox{display:flex;gap:var(--s-2);align-items:flex-start;font-size:14px;line-height:20px;color:var(--warn);padding:var(--s-3);border:1px solid var(--line-2);border-radius:6px;background:var(--bg)}
-.dlg-act{display:flex;gap:var(--s-2);flex-wrap:wrap}
-.dlg-act .primary{flex:1}
+.chk{display:flex;align-items:center;gap:var(--s-2);font-size:14px;line-height:20px;cursor:pointer}
+.chk input{width:16px;height:16px;accent-color:#fff}
+.st-foot{position:sticky;bottom:0;background:var(--panel-2);border-top:1px solid var(--line);border-radius:0 0 8px 8px;padding:var(--s-4) var(--s-5);display:grid;gap:var(--s-3)}
+.summary{display:flex;gap:var(--s-2);align-items:center;font-size:14px;line-height:20px}
+.hint{display:flex;gap:var(--s-2);align-items:flex-start;font-size:14px;line-height:20px;color:var(--warn);padding:var(--s-3);border:1px solid var(--line-2);border-radius:6px;background:var(--bg)}
+.hint ol{padding-left:var(--s-4)}
+.actions{display:flex;gap:var(--s-2);flex-wrap:wrap}
+.actions .primary{flex:1;min-width:200px}
 
-/* sections */
+/* paper sheets, preview and print */
+.box{container-type:inline-size;width:100%;aspect-ratio:var(--ar);background:#fff;border:1px solid var(--line-2);overflow:hidden;position:relative}
+.box.rot .sheet{transform:rotate(180deg)}
+.sheet{width:100%;height:100%;display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);padding:calc(var(--m) * 100cqw)}
+.cell{display:flex;min-width:0;min-height:0;padding:calc(var(--gap) * 1cqw)}
+.cell img{width:100%;height:100%;object-fit:contain;display:block}
+#printRoot{display:none}
+@media print{
+  html,body{background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body>*:not(#printRoot){display:none!important}
+  #printRoot{display:block}
+  #printRoot .box{width:var(--wmm);height:var(--hmm);aspect-ratio:auto;border:0;break-after:page;page-break-after:always}
+  #printRoot .box:last-child{break-after:auto;page-break-after:auto}
+}
+
 section.block{padding:var(--s-10) 0}
 .tag{padding:var(--s-11) 0}
 .tag p{max-width:680px;font-size:48px;line-height:1;font-weight:600;letter-spacing:-0.02em;text-wrap:balance}
@@ -169,6 +176,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
 }
 @media(prefers-reduced-transparency:reduce){nav{background:#000;backdrop-filter:none;-webkit-backdrop-filter:none}dialog::backdrop{backdrop-filter:none;background:#000}}
 </style>
+<style id="pageStyle"></style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -184,61 +192,39 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
 <main id="main">
   <header class="hero" id="top">
     <div class="wrap">
-      <h1 class="reveal">Upload a PDF here.<br>Print it over there.</h1>
-      <p class="sub reveal">Send a file from one computer, then pick copies, paper and sides on the other and press print. Prefer to just save it? Download works too.</p>
+      <h1 class="reveal">Upload at home.<br>Print at any shop.</h1>
+      <p class="sub reveal">Put your PDFs on Ferry, open it on the shop computer, choose copies, paper size, color and sides, then print. Nothing to install on that computer.</p>
 
       <div class="vault reveal" id="vault">
-        <!-- gate -->
         <div class="panel-in" id="gate">
           <form id="gateForm" novalidate>
             <label class="lbl" for="pass">Passcode</label>
             <div class="row">
               <input class="field" id="pass" type="password" autocomplete="current-password" placeholder="Enter your passcode" required>
-              <button class="btn primary" type="submit" id="unlockBtn"><iconify-icon icon="ph:lock-key-open" aria-hidden="true"></iconify-icon>Unlock</button>
+              <button class="btn primary" type="submit" id="unlockBtn" style="flex:none"><iconify-icon icon="ph:lock-key-open" aria-hidden="true"></iconify-icon>Unlock</button>
             </div>
             <p class="msg" id="gateMsg" role="alert"></p>
-            <p class="note">Use the VAULT_PASSCODE you set in Netlify. Same passcode on both computers.</p>
+            <p class="note">Use the VAULT_PASSCODE you set in Netlify. On a shop computer, press Lock when you finish.</p>
           </form>
         </div>
 
-        <!-- app -->
         <div id="app" class="hidden">
-          <div class="top">
-            <div class="tabs" role="tablist" aria-label="Sections">
-              <button class="tab" role="tab" id="tabFiles" aria-selected="true" aria-controls="viewFiles" type="button"><iconify-icon icon="ph:files" aria-hidden="true" style="font-size:16px"></iconify-icon>Files</button>
-              <button class="tab" role="tab" id="tabJobs" aria-selected="false" aria-controls="viewJobs" type="button"><iconify-icon icon="ph:printer" aria-hidden="true" style="font-size:16px"></iconify-icon>Print jobs</button>
-            </div>
-            <span class="agent" id="agent" role="status"><i></i><span>Checking printer…</span></span>
+          <div class="drop" id="drop">
+            <iconify-icon icon="ph:upload-simple" aria-hidden="true"></iconify-icon>
+            <strong>Drop PDFs here</strong>
+            <p>Up to 200 MB per file. Several files at once is fine.</p>
+            <button class="btn primary" type="button" id="pick">Choose PDFs</button>
+            <input type="file" id="file" accept="application/pdf,.pdf" multiple class="hidden" aria-label="Choose PDF files">
           </div>
-          <p class="msg" id="appMsg" role="status" style="padding:0 var(--s-1);margin-top:0"></p>
-
-          <!-- files -->
-          <div id="viewFiles" role="tabpanel" aria-labelledby="tabFiles">
-            <div class="drop" id="drop">
-              <iconify-icon icon="ph:upload-simple" aria-hidden="true"></iconify-icon>
-              <strong>Drop PDFs here</strong>
-              <p>Up to 200 MB per file. Several files at once is fine.</p>
-              <button class="btn primary" type="button" id="pick">Choose PDFs</button>
-              <input type="file" id="file" accept="application/pdf,.pdf" multiple class="hidden" aria-label="Choose PDF files">
+          <p class="msg" id="appMsg" role="status" style="padding:0 var(--s-1)"></p>
+          <div class="listhead">
+            <h2>Your files</h2>
+            <div class="row" style="gap:var(--s-2)">
+              <button class="btn sm" type="button" id="refresh"><iconify-icon icon="ph:arrows-clockwise" aria-hidden="true" style="font-size:16px"></iconify-icon>Refresh</button>
+              <button class="btn sm" type="button" id="lock"><iconify-icon icon="ph:lock-key" aria-hidden="true" style="font-size:16px"></iconify-icon>Lock</button>
             </div>
-            <div class="listhead">
-              <h2>Your files</h2>
-              <div class="row" style="gap:var(--s-2)">
-                <button class="btn sm" type="button" id="refresh"><iconify-icon icon="ph:arrows-clockwise" aria-hidden="true" style="font-size:16px"></iconify-icon>Refresh</button>
-                <button class="btn sm" type="button" id="lock"><iconify-icon icon="ph:lock-key" aria-hidden="true" style="font-size:16px"></iconify-icon>Lock</button>
-              </div>
-            </div>
-            <ul class="list" id="list" aria-live="polite"></ul>
           </div>
-
-          <!-- jobs -->
-          <div id="viewJobs" role="tabpanel" aria-labelledby="tabJobs" class="hidden">
-            <div class="listhead" style="margin-top:var(--s-2)">
-              <h2>Print jobs</h2>
-              <button class="btn sm" type="button" id="clearJobs"><iconify-icon icon="ph:broom" aria-hidden="true" style="font-size:16px"></iconify-icon>Clear finished</button>
-            </div>
-            <ul class="list" id="jobs" aria-live="polite"></ul>
-          </div>
+          <ul class="list" id="list" aria-live="polite"></ul>
         </div>
       </div>
     </div>
@@ -246,17 +232,17 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
 
   <section class="tag" aria-label="Tagline">
     <div class="wrap">
-      <p id="tagline">Your PDF leaves one computer and comes out of the printer on the next. No email to yourself, no flash drive, no print dialog to fight with.</p>
+      <p id="tagline">Walk into any print shop with nothing in your hands. Open one page, pick your settings, and the pages come out the way you planned them at home.</p>
     </div>
   </section>
 
   <section class="block" id="how">
     <div class="wrap">
-      <h2 class="sec reveal">Three steps, two computers</h2>
+      <h2 class="sec reveal">Three steps, any computer</h2>
       <ol class="steps">
-        <li class="step reveal"><b>Step 1</b><h3>Upload on the first computer</h3><p>Unlock with your passcode and drop in the PDFs you want to move.</p></li>
-        <li class="step reveal"><b>Step 2</b><h3>Choose print settings</h3><p>On the computer with the printer, press Print on a file. Set copies, paper size, paper type, color and sides.</p></li>
-        <li class="step reveal"><b>Step 3</b><h3>Printing starts</h3><p>The Ferry print helper on that computer picks up the job and sends it to the printer. Watch progress under Print jobs.</p></li>
+        <li class="step reveal"><b>Step 1</b><h3>Upload at home</h3><p>Unlock Ferry with your passcode and drop in the PDFs you need printed.</p></li>
+        <li class="step reveal"><b>Step 2</b><h3>Open it at the shop</h3><p>Visit the same address on the shop computer. Press Print on a file and set copies, size, color, sides and pages. A live preview shows each sheet.</p></li>
+        <li class="step reveal"><b>Step 3</b><h3>Print and lock</h3><p>Press Print, confirm in the shop's print window, then delete the file and press Lock.</p></li>
       </ol>
     </div>
   </section>
@@ -265,12 +251,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
     <div class="wrap">
       <h2 class="sec reveal">Questions you might have</h2>
       <div class="faq reveal">
-        <details><summary>Why do I need a print helper?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Websites are not allowed to choose duplex, paper size or copies on your printer by themselves. A small helper program on the computer with the printer receives the job and prints it with those exact settings.</p></details>
-        <details><summary>What if the helper is not running?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>The job waits in the queue and prints as soon as the helper starts. You can also use the browser print dialog from the Print window.</p></details>
-        <details><summary>Does paper type change the printer tray?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Only if you map each paper type to a printer preset in the helper config. Otherwise the type is shown in the helper console as a reminder to load that paper.</p></details>
-        <details><summary>Who can see my files?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Only someone who has the address and the passcode. Files sit in your own Netlify storage.</p></details>
-        <details><summary>How large can a file be?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Up to 200 MB each. Ferry splits big files into 4 MB pieces while uploading and joins them again on download or print.</p></details>
-        <details><summary>How long do files stay?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Until you press Delete. Ferry does not remove anything by itself.</p></details>
+        <details><summary>Do I install anything on the shop computer?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>No. Ferry runs in the browser. Chrome or Edge gives the best results.</p></details>
+        <details><summary>Why does a print window still appear?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Browsers never let a website print silently. Ferry prepares the exact sheets, sets the paper size, and opens that window. You only pick the printer and press Print.</p></details>
+        <details><summary>Can Ferry do double sided printing?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Two ways. If the shop printer has duplex, choose "printer does it" and tick Two sided in the print window. If it does not, choose "by hand": Ferry prints the front sides first, then the back sides in the right order after you reload the paper.</p></details>
+        <details><summary>What about paper type and tray?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Paper type and tray live in the printer settings, so Ferry cannot change them. Choose them in the print window or ask the shop. Paper size, orientation, copies, color, pages per sheet and margins are all handled by Ferry.</p></details>
+        <details><summary>Is it safe on a shop computer?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>The passcode is kept only until you close the tab. Press Lock and delete your files when you finish. Ferry also removes its temporary page images when you close the print window.</p></details>
+        <details><summary>How large can a file be?<iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></summary><p>Up to 200 MB each. Very long PDFs take longer to prepare because each page is rendered before printing.</p></details>
       </div>
     </div>
   </section>
@@ -278,81 +264,117 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
 
 <footer>
   <div class="wrap">
-    <span>Ferry. A private file and print bridge for your own computers.</span>
+    <span>Ferry. Your PDFs, ready on any computer.</span>
     <a href="#top">Back to top</a>
   </div>
 </footer>
 
-<!-- print dialog -->
-<dialog id="dlg" aria-labelledby="dlgTitle">
-  <form method="dialog" id="printForm" class="dlg-in" novalidate>
-    <div class="dlg-head">
-      <div><h2 id="dlgTitle">Print settings</h2><p id="dlgFile"></p></div>
-      <button class="btn sm" type="button" id="dlgClose" aria-label="Close print settings"><iconify-icon icon="ph:x" aria-hidden="true" style="font-size:16px"></iconify-icon></button>
+<div id="printRoot" aria-hidden="true"></div>
+
+<dialog id="studio" aria-labelledby="stTitle">
+  <div class="st-in">
+    <div class="st-head">
+      <div><h2 id="stTitle">Print studio</h2><p id="stFile"></p></div>
+      <button class="btn sm" type="button" id="stClose" aria-label="Close print studio"><iconify-icon icon="ph:x" aria-hidden="true" style="font-size:16px"></iconify-icon></button>
     </div>
 
-    <div class="grid2">
-      <div>
-        <label class="lbl" for="copies">Copies</label>
-        <div class="stepper">
-          <button class="btn" type="button" id="minus" aria-label="One fewer copy"><iconify-icon icon="ph:minus" aria-hidden="true"></iconify-icon></button>
-          <input class="field" id="copies" type="number" inputmode="numeric" min="1" max="99" value="1">
-          <button class="btn" type="button" id="plus" aria-label="One more copy"><iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></button>
+    <div class="st-body">
+      <section aria-label="Preview">
+        <div class="prep" id="prep"><span id="prepText">Loading PDF…</span><div class="bar"><i id="prepBar"></i></div></div>
+        <div class="pgrid" id="preview"></div>
+        <p class="note" id="more"></p>
+      </section>
+
+      <form class="st-set" id="settings" novalidate>
+        <div class="grid2">
+          <div>
+            <label class="lbl" for="copies">Copies</label>
+            <div class="stepper">
+              <button class="btn" type="button" id="minus" aria-label="One fewer copy"><iconify-icon icon="ph:minus" aria-hidden="true"></iconify-icon></button>
+              <input class="field" id="copies" type="number" inputmode="numeric" min="1" max="99" value="1">
+              <button class="btn" type="button" id="plus" aria-label="One more copy"><iconify-icon icon="ph:plus" aria-hidden="true"></iconify-icon></button>
+            </div>
+          </div>
+          <div>
+            <label class="lbl" for="pages">Pages</label>
+            <input class="field" id="pages" type="text" inputmode="numeric" placeholder="All, or 1-3,5" autocomplete="off">
+          </div>
         </div>
-      </div>
-      <div>
-        <label class="lbl" for="pages">Pages</label>
-        <input class="field" id="pages" type="text" inputmode="numeric" placeholder="All pages, or 1-3,5" autocomplete="off">
-      </div>
+        <label class="chk" id="collateRow"><input type="checkbox" id="collate" checked>Keep copies in order (1 2 3, 1 2 3)</label>
+
+        <fieldset><legend class="lbl">Paper size</legend>
+          <div class="seg">
+            <label><input type="radio" name="paper" value="A4" checked><span>A4</span></label>
+            <label><input type="radio" name="paper" value="A3"><span>A3</span></label>
+            <label><input type="radio" name="paper" value="A5"><span>A5</span></label>
+            <label><input type="radio" name="paper" value="Letter"><span>Letter</span></label>
+            <label><input type="radio" name="paper" value="Legal"><span>Legal</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset><legend class="lbl">Color</legend>
+          <div class="seg">
+            <label><input type="radio" name="color" value="mono" checked><span>Black and white</span></label>
+            <label><input type="radio" name="color" value="color"><span>Color</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset><legend class="lbl">Sides</legend>
+          <div class="seg">
+            <label><input type="radio" name="sides" value="single" checked><span>One side</span></label>
+            <label><input type="radio" name="sides" value="duplex"><span>Both, printer does it</span></label>
+            <label><input type="radio" name="sides" value="manual"><span>Both, by hand</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset id="flipRow" class="hidden"><legend class="lbl">Flip on</legend>
+          <div class="seg">
+            <label><input type="radio" name="flip" value="long" checked><span>Long edge</span></label>
+            <label><input type="radio" name="flip" value="short"><span>Short edge</span></label>
+          </div>
+        </fieldset>
+        <label class="chk hidden" id="reverseRow"><input type="checkbox" id="reverse" checked>Print back sides in reverse order</label>
+
+        <fieldset><legend class="lbl">Pages per sheet</legend>
+          <div class="seg">
+            <label><input type="radio" name="nup" value="1" checked><span>1</span></label>
+            <label><input type="radio" name="nup" value="2"><span>2</span></label>
+            <label><input type="radio" name="nup" value="4"><span>4</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset><legend class="lbl">Orientation</legend>
+          <div class="seg">
+            <label><input type="radio" name="orient" value="auto" checked><span>Auto</span></label>
+            <label><input type="radio" name="orient" value="portrait"><span>Portrait</span></label>
+            <label><input type="radio" name="orient" value="landscape"><span>Landscape</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset><legend class="lbl">Margin</legend>
+          <div class="seg">
+            <label><input type="radio" name="margin" value="0"><span>None</span></label>
+            <label><input type="radio" name="margin" value="5" checked><span>Small</span></label>
+            <label><input type="radio" name="margin" value="10"><span>Normal</span></label>
+          </div>
+        </fieldset>
+      </form>
     </div>
 
-    <fieldset>
-      <legend class="lbl">Paper size</legend>
-      <div class="seg" id="segPaper">
-        <label><input type="radio" name="paper" value="A4" checked><span>A4</span></label>
-        <label><input type="radio" name="paper" value="A3"><span>A3</span></label>
-        <label><input type="radio" name="paper" value="A5"><span>A5</span></label>
-        <label><input type="radio" name="paper" value="Letter"><span>Letter</span></label>
-        <label><input type="radio" name="paper" value="Legal"><span>Legal</span></label>
+    <div class="st-foot">
+      <p class="summary"><iconify-icon icon="ph:printer" aria-hidden="true"></iconify-icon><span id="summary">Preparing…</span></p>
+      <div class="hint hidden" id="hintDuplex"><iconify-icon icon="ph:info" aria-hidden="true"></iconify-icon><span id="hintDuplexText"></span></div>
+      <div class="hint hidden" id="hintManual"><iconify-icon icon="ph:info" aria-hidden="true"></iconify-icon>
+        <ol><li>Press Print front sides. Print the first batch.</li><li>Take the printed stack and put it back in the tray so the blank side prints next.</li><li>Press Print back sides.</li></ol></div>
+      <p class="msg" id="stMsg" role="status" style="margin:0"></p>
+      <div class="actions">
+        <button class="btn primary" type="button" id="printAll" disabled><iconify-icon icon="ph:printer" aria-hidden="true"></iconify-icon><span>Print</span></button>
+        <button class="btn primary hidden" type="button" id="printFront" disabled><span>1. Print front sides</span></button>
+        <button class="btn primary hidden" type="button" id="printBack" disabled><span>2. Print back sides</span></button>
+        <button class="btn hidden" type="button" id="delNow"><iconify-icon icon="ph:trash" aria-hidden="true" style="font-size:16px"></iconify-icon>Delete file from Ferry</button>
       </div>
-    </fieldset>
-
-    <div>
-      <label class="lbl" for="paperType">Paper type</label>
-      <select class="field" id="paperType">
-        <option value="plain">Plain paper</option>
-        <option value="photo">Photo paper</option>
-        <option value="glossy">Glossy paper</option>
-        <option value="card">Card stock</option>
-      </select>
     </div>
-
-    <fieldset>
-      <legend class="lbl">Color</legend>
-      <div class="seg">
-        <label><input type="radio" name="color" value="mono" checked><span>Black and white</span></label>
-        <label><input type="radio" name="color" value="color"><span>Color</span></label>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend class="lbl">Sides</legend>
-      <div class="seg">
-        <label><input type="radio" name="sides" value="single" checked><span>One side</span></label>
-        <label><input type="radio" name="sides" value="duplex_long"><span>Both sides, long edge</span></label>
-        <label><input type="radio" name="sides" value="duplex_short"><span>Both sides, short edge</span></label>
-      </div>
-    </fieldset>
-
-    <p class="summary"><iconify-icon icon="ph:printer" aria-hidden="true"></iconify-icon><span id="summary"></span></p>
-    <p class="warnbox hidden" id="agentWarn"><iconify-icon icon="ph:warning" aria-hidden="true"></iconify-icon><span>The print helper is offline. The job will wait in the queue until it starts.</span></p>
-    <p class="msg err" id="dlgMsg" role="alert" style="margin:0"></p>
-
-    <div class="dlg-act">
-      <button class="btn primary" type="submit" id="sendPrint"><iconify-icon icon="ph:printer" aria-hidden="true"></iconify-icon>Send to printer</button>
-      <button class="btn" type="button" id="browserPrint">Use browser print dialog</button>
-    </div>
-  </form>
+  </div>
 </dialog>
 
 <script>
@@ -360,34 +382,22 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
   const $ = (s) => document.querySelector(s);
   const CHUNK = 4 * 1024 * 1024;
   const MAX = 200 * 1024 * 1024;
+  const RS = 2.4; // render scale, about 170 dpi on A4
+  const PAPERS = { A4: [210, 297], A3: [297, 420], A5: [148, 210], Letter: [215.9, 279.4], Legal: [215.9, 355.6] };
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let pass = "";
   try { pass = sessionStorage.getItem("ferry.pass") || ""; } catch {}
 
-  /* reveal on scroll */
-  const io = new IntersectionObserver((es) => es.forEach((e) => {
-    if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-  }), { threshold: 0.12 });
-  document.querySelectorAll(".reveal").forEach((el, i) => {
-    el.style.transitionDelay = el.closest(".hero") ? (i * 100) + "ms" : "0ms";
-    io.observe(el);
-  });
-
-  /* tagline word by word */
-  const tl = $("#tagline");
-  const words = tl.textContent.trim().split(/\s+/);
+  /* reveal, tagline, nav */
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((el, i) => { el.style.transitionDelay = el.closest(".hero") ? (i * 100) + "ms" : "0ms"; io.observe(el); });
+  const tl = $("#tagline"), words = tl.textContent.trim().split(/\s+/);
   tl.setAttribute("aria-label", words.join(" "));
   tl.innerHTML = words.map((w) => `<span class="w" aria-hidden="true">${w}</span>`).join(" ");
-  const wio = new IntersectionObserver((es) => es.forEach((e) => {
-    if (e.isIntersecting) { e.target.classList.add("on"); wio.unobserve(e.target); }
-  }), { rootMargin: "0px 0px -35% 0px" });
+  const wio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("on"); wio.unobserve(e.target); } }), { rootMargin: "0px 0px -35% 0px" });
   tl.querySelectorAll(".w").forEach((w) => reduce ? w.classList.add("on") : wio.observe(w));
-
-  /* nav current section */
   const links = [...document.querySelectorAll("nav .links a")];
-  const sio = new IntersectionObserver((es) => es.forEach((e) => {
-    if (e.isIntersecting) links.forEach((a) => a.setAttribute("aria-current", String(a.getAttribute("href") === "#" + e.target.id)));
-  }), { rootMargin: "-45% 0px -50% 0px" });
+  const sio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) links.forEach((a) => a.setAttribute("aria-current", String(a.getAttribute("href") === "#" + e.target.id))); }), { rootMargin: "-45% 0px -50% 0px" });
   ["how", "faq"].forEach((id) => sio.observe(document.getElementById(id)));
 
   /* helpers */
@@ -395,58 +405,30 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
   const say = (el, kind, text) => { el.className = "msg " + (kind || ""); el.innerHTML = text ? icon(kind === "err" ? "warning-circle" : "check-circle") + "<span></span>" : ""; if (text) el.querySelector("span").textContent = text; };
   const fmt = (b) => b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + " KB" : (b / 1024 / 1024).toFixed(1) + " MB";
   const when = (t) => new Date(t).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
-  const L = {
-    paperType: { plain: "Plain paper", photo: "Photo paper", glossy: "Glossy paper", card: "Card stock" },
-    color: { mono: "Black and white", color: "Color" },
-    sides: { single: "One side", duplex_long: "Both sides, long edge", duplex_short: "Both sides, short edge" },
-  };
-
   class AuthError extends Error {}
   async function api(path, opts = {}) {
     const r = await fetch("/api" + path, { ...opts, headers: { "x-passcode": pass, ...(opts.headers || {}) } });
     if (r.status === 401) throw new AuthError("Wrong passcode.");
-    if (!r.ok) {
-      let m = "Request failed. Please try again.";
-      try { m = (await r.json()).error || m; } catch {}
-      throw new Error(m);
-    }
+    if (!r.ok) { let m = "Request failed. Please try again."; try { m = (await r.json()).error || m; } catch {} throw new Error(m); }
     return r;
   }
   const jsonBody = (o) => ({ headers: { "content-type": "application/json" }, body: JSON.stringify(o) });
 
   /* gate */
   const gate = $("#gate"), app = $("#app"), gateMsg = $("#gateMsg"), appMsg = $("#appMsg");
-  function showApp() { gate.classList.add("hidden"); app.classList.remove("hidden"); loadList(true); refreshJobs(); startPolling(); }
-  function showGate(msg) { stopPolling(); app.classList.add("hidden"); gate.classList.remove("hidden"); say(gateMsg, "err", msg); }
+  const showApp = () => { gate.classList.add("hidden"); app.classList.remove("hidden"); loadList(true); };
+  const showGate = (msg) => { closeStudio(); app.classList.add("hidden"); gate.classList.remove("hidden"); say(gateMsg, "err", msg); };
   const authFail = () => showGate("Session expired. Enter the passcode again.");
-
   $("#gateForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const v = $("#pass").value.trim();
     if (!v) { say(gateMsg, "err", "Enter your passcode."); $("#pass").focus(); return; }
-    pass = v;
-    const btn = $("#unlockBtn"); btn.disabled = true; say(gateMsg, "", "");
-    try {
-      await api("/files");
-      try { sessionStorage.setItem("ferry.pass", pass); } catch {}
-      $("#pass").value = "";
-      showApp();
-    } catch (err) { pass = ""; say(gateMsg, "err", err.message); }
+    pass = v; const btn = $("#unlockBtn"); btn.disabled = true; say(gateMsg, "", "");
+    try { await api("/files"); try { sessionStorage.setItem("ferry.pass", pass); } catch {} $("#pass").value = ""; showApp(); }
+    catch (err) { pass = ""; say(gateMsg, "err", err.message); }
     finally { btn.disabled = false; }
   });
-  $("#lock").addEventListener("click", () => {
-    pass = ""; try { sessionStorage.removeItem("ferry.pass"); } catch {}
-    say(appMsg, "", ""); showGate("");
-  });
-
-  /* tabs */
-  const tabs = { files: [$("#tabFiles"), $("#viewFiles")], jobs: [$("#tabJobs"), $("#viewJobs")] };
-  function setTab(name) {
-    Object.entries(tabs).forEach(([k, [t, v]]) => { t.setAttribute("aria-selected", String(k === name)); v.classList.toggle("hidden", k !== name); });
-    if (name === "jobs") refreshJobs();
-  }
-  tabs.files[0].addEventListener("click", () => setTab("files"));
-  tabs.jobs[0].addEventListener("click", () => setTab("jobs"));
+  $("#lock").addEventListener("click", () => { pass = ""; try { sessionStorage.removeItem("ferry.pass"); } catch {} say(appMsg, "", ""); showGate(""); });
 
   /* files */
   const list = $("#list");
@@ -457,16 +439,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
     catch (err) { if (err instanceof AuthError) return authFail(); list.innerHTML = ""; say(appMsg, "err", err.message); }
   }
   function renderFiles() {
-    if (!files.length) { list.innerHTML = '<li class="empty"><strong>Nothing here yet</strong>Upload a PDF on this computer, then open Ferry on the one with the printer.</li>'; return; }
-    list.innerHTML = "";
-    files.forEach((f) => list.appendChild(fileRow(f)));
+    if (!files.length) { list.innerHTML = '<li class="empty"><strong>Nothing here yet</strong>Upload a PDF, then open Ferry on the shop computer.</li>'; return; }
+    list.innerHTML = ""; files.forEach((f) => list.appendChild(fileRow(f)));
   }
   async function fetchPdf(f, onProgress) {
     const parts = [];
-    for (let i = 0; i < f.chunks; i++) {
-      parts.push(await (await api(`/files/${f.id}/chunks/${i}`)).arrayBuffer());
-      onProgress && onProgress((i + 1) / f.chunks);
-    }
+    for (let i = 0; i < f.chunks; i++) { parts.push(await (await api(`/files/${f.id}/chunks/${i}`)).arrayBuffer()); onProgress && onProgress((i + 1) / f.chunks); }
     return new Blob(parts, { type: "application/pdf" });
   }
   function fileRow(f) {
@@ -482,7 +460,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
     li.querySelector(".name").textContent = f.name;
     li.querySelector(".sub2").textContent = fmt(f.size) + " · " + when(f.created);
     const dl = li.querySelector(".dl"), del = li.querySelector(".del"), bar = li.querySelector(".bar"), fill = bar.querySelector("i");
-    li.querySelector(".pr").addEventListener("click", () => openPrint(f));
+    li.querySelector(".pr").addEventListener("click", () => openStudio(f));
     dl.addEventListener("click", async () => {
       dl.disabled = true; bar.classList.remove("hidden"); say(appMsg, "", "");
       try {
@@ -497,11 +475,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
     });
     let armed = 0;
     del.addEventListener("click", async () => {
-      if (!armed) {
-        armed = setTimeout(() => { armed = 0; del.querySelector("span").textContent = "Delete"; }, 3500);
-        del.querySelector("span").textContent = "Confirm delete";
-        return;
-      }
+      if (!armed) { armed = setTimeout(() => { armed = 0; del.querySelector("span").textContent = "Delete"; }, 3500); del.querySelector("span").textContent = "Confirm delete"; return; }
       clearTimeout(armed); del.disabled = true;
       try { await api(`/files/${f.id}`, { method: "DELETE" }); files = files.filter((x) => x.id !== f.id); renderFiles(); say(appMsg, "ok", f.name + " deleted."); }
       catch (err) { del.disabled = false; armed = 0; del.querySelector("span").textContent = "Delete"; say(appMsg, "err", "Delete failed. " + err.message); }
@@ -517,8 +491,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
   ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
   drop.addEventListener("drop", (e) => upload([...e.dataTransfer.files]));
   $("#refresh").addEventListener("click", () => loadList(false));
-  addEventListener("focus", () => { if (pass && !app.classList.contains("hidden")) { loadList(false); refreshJobs(); } });
-
+  addEventListener("focus", () => { if (pass && !app.classList.contains("hidden") && !studio.open) loadList(false); });
   async function upload(picked) {
     const skipped = picked.filter((f) => !(f.type === "application/pdf" || /\.pdf$/i.test(f.name)));
     const big = picked.filter((f) => f.size > MAX);
@@ -535,119 +508,248 @@ footer .wrap{display:flex;justify-content:space-between;gap:var(--s-4);flex-wrap
       try {
         const n = Math.ceil(f.size / CHUNK);
         const { id } = await (await api("/files", { method: "POST", ...jsonBody({ name: f.name, size: f.size, chunks: n }) })).json();
-        for (let i = 0; i < n; i++) {
-          await api(`/files/${id}/chunks/${i}`, { method: "PUT", body: f.slice(i * CHUNK, (i + 1) * CHUNK) });
-          fill.style.width = Math.round(((i + 1) / n) * 100) + "%";
-        }
+        for (let i = 0; i < n; i++) { await api(`/files/${id}/chunks/${i}`, { method: "PUT", body: f.slice(i * CHUNK, (i + 1) * CHUNK) }); fill.style.width = Math.round(((i + 1) / n) * 100) + "%"; }
         await api(`/files/${id}/complete`, { method: "POST" });
-        say(appMsg, "ok", f.name + " is ready to print or download on your other computer.");
-      } catch (err) {
-        li.remove();
-        if (err instanceof AuthError) return authFail();
-        say(appMsg, "err", `Could not upload ${f.name}. ${err.message}`);
-      }
+        say(appMsg, "ok", f.name + " is ready to print on any computer.");
+      } catch (err) { li.remove(); if (err instanceof AuthError) return authFail(); say(appMsg, "err", `Could not upload ${f.name}. ${err.message}`); }
     }
     loadList(false);
   }
 
-  /* agent status + jobs */
-  const agentEl = $("#agent"), jobsEl = $("#jobs");
-  let agentOnline = false, timer = 0;
-  function setAgent(a) {
-    agentOnline = !!(a && a.online);
-    agentEl.className = "agent" + (agentOnline ? " on" : "");
-    agentEl.querySelector("span").textContent = agentOnline ? `Printer ready: ${a.printer} on ${a.name}` : "Print helper offline";
-    $("#agentWarn").classList.toggle("hidden", agentOnline);
-  }
-  const STATUS = {
-    queued: ["clock", "Waiting for the printer"],
-    printing: ["printer", "Printing now"],
-    done: ["check-circle", "Printed"],
-    failed: ["warning-circle", "Failed"],
-  };
-  const jobLine = (j) => `${j.copies} ${j.copies === 1 ? "copy" : "copies"} · ${j.paper} · ${L.paperType[j.paperType]} · ${L.color[j.color]} · ${L.sides[j.sides]}${j.pages ? " · Pages " + j.pages : ""}`;
-  async function refreshJobs() {
-    if (!pass) return;
-    try {
-      const { jobs, agent } = await (await api("/jobs")).json();
-      setAgent(agent);
-      if (!jobs.length) { jobsEl.innerHTML = '<li class="empty"><strong>No print jobs yet</strong>Press Print on a file to send one.</li>'; return; }
-      jobsEl.innerHTML = "";
-      jobs.forEach((j) => {
-        const li = document.createElement("li");
-        li.className = "item";
-        const [ic, label] = STATUS[j.status] || STATUS.queued;
-        li.innerHTML = `<span class="ic">${icon("printer")}</span>
-          <div class="meta"><div class="name"></div><div class="sub2 line"></div><div class="pill ${j.status}">${icon(ic)}<span class="st"></span></div></div>
-          <div class="acts"><button class="btn sm rm" type="button">${icon(j.status === "queued" ? "x" : "trash", 16)}<span>${j.status === "queued" ? "Cancel" : "Remove"}</span></button></div>`;
-        li.querySelector(".name").textContent = j.fileName;
-        li.querySelector(".line").textContent = jobLine(j);
-        li.querySelector(".st").textContent = label + (j.status === "failed" && j.message ? ": " + j.message : "");
-        li.querySelector(".rm").addEventListener("click", async () => { try { await api(`/jobs/${j.id}`, { method: "DELETE" }); refreshJobs(); } catch (err) { say(appMsg, "err", err.message); } });
-        jobsEl.appendChild(li);
-      });
-    } catch (err) { if (err instanceof AuthError) authFail(); }
-  }
-  $("#clearJobs").addEventListener("click", async () => { try { await api("/jobs", { method: "DELETE" }); refreshJobs(); } catch (err) { say(appMsg, "err", err.message); } });
-  function startPolling() { stopPolling(); timer = setInterval(() => { if (!document.hidden) refreshJobs(); }, 3000); }
-  function stopPolling() { clearInterval(timer); timer = 0; }
+  /* ================= print studio ================= */
+  const studio = $("#studio"), settings = $("#settings"), preview = $("#preview"), printRoot = $("#printRoot"), stMsg = $("#stMsg");
+  let S = null;
 
-  /* print dialog */
-  const dlg = $("#dlg"), copies = $("#copies"), pagesEl = $("#pages"), typeEl = $("#paperType"), dlgMsg = $("#dlgMsg");
-  let current = null;
-  const val = (name) => document.querySelector(`input[name="${name}"]:checked`).value;
-  const clamp = () => { const n = Math.round(Number(copies.value)); copies.value = Number.isFinite(n) ? Math.min(99, Math.max(1, n)) : 1; };
-  function updateSummary() {
-    const n = Number(copies.value) || 1;
-    $("#summary").textContent = `${n} ${n === 1 ? "copy" : "copies"}, ${val("paper")}, ${L.paperType[typeEl.value].toLowerCase()}, ${L.color[val("color")].toLowerCase()}, ${L.sides[val("sides")].toLowerCase()}${pagesEl.value.trim() ? ", pages " + pagesEl.value.replace(/\s+/g, "") : ""}`;
-  }
-  function openPrint(f) {
-    current = f;
-    $("#dlgFile").textContent = f.name;
-    say(dlgMsg, "", "");
-    $("#sendPrint").disabled = false;
-    updateSummary();
-    dlg.showModal();
-    refreshJobs();
-  }
-  $("#minus").addEventListener("click", () => { copies.value = (Number(copies.value) || 1) - 1; clamp(); updateSummary(); });
-  $("#plus").addEventListener("click", () => { copies.value = (Number(copies.value) || 1) + 1; clamp(); updateSummary(); });
-  copies.addEventListener("change", () => { clamp(); updateSummary(); });
-  document.getElementById("printForm").addEventListener("input", updateSummary);
-  $("#dlgClose").addEventListener("click", () => dlg.close());
-  dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+  const rv = (n) => settings.querySelector(`input[name="${n}"]:checked`).value;
+  const clampCopies = () => { const el = $("#copies"); const n = Math.round(Number(el.value)); el.value = Number.isFinite(n) ? Math.min(99, Math.max(1, n)) : 1; return Number(el.value); };
+  const readSettings = () => ({ copies: clampCopies(), collate: $("#collate").checked, pages: $("#pages").value.replace(/\s+/g, ""), paper: rv("paper"), orient: rv("orient"), color: rv("color"), sides: rv("sides"), flip: rv("flip"), nup: Number(rv("nup")), margin: Number(rv("margin")), reverse: $("#reverse").checked });
 
-  $("#printForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    clamp();
-    const pages = pagesEl.value.replace(/\s+/g, "");
-    if (pages && !/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(pages)) { say(dlgMsg, "err", "Pages look wrong. Use a format like 1-3,5 or leave empty."); pagesEl.focus(); return; }
-    const btn = $("#sendPrint"); btn.disabled = true; say(dlgMsg, "", "");
-    try {
-      await api("/jobs", { method: "POST", ...jsonBody({ fileId: current.id, copies: Number(copies.value), paper: val("paper"), paperType: typeEl.value, color: val("color"), sides: val("sides"), pages }) });
-      dlg.close();
-      setTab("jobs");
-      say(appMsg, "ok", agentOnline ? "Sent to the printer. It should start in a few seconds." : "Job queued. It will print when the print helper starts.");
-    } catch (err) {
-      if (err instanceof AuthError) { dlg.close(); return authFail(); }
-      say(dlgMsg, "err", err.message); btn.disabled = false;
+  function parseRange(str, total) {
+    if (!str) return Array.from({ length: total }, (_, i) => i + 1);
+    const out = [];
+    for (const tok of str.split(",")) {
+      const m = tok.match(/^(\d+)(?:-(\d+))?$/);
+      if (!m) return null;
+      const a = Number(m[1]), b = m[2] ? Number(m[2]) : a;
+      if (a < 1 || b < a || b > total) return { error: `Pages must be between 1 and ${total}.` };
+      for (let i = a; i <= b; i++) out.push(i);
     }
-  });
+    return out;
+  }
 
-  /* browser print fallback */
-  $("#browserPrint").addEventListener("click", async () => {
-    const btn = $("#browserPrint"); btn.disabled = true; btn.textContent = "Preparing…";
+  function plan() {
+    const s = readSettings();
+    const list = parseRange(s.pages, S.total);
+    if (!list) return { error: "Page format looks wrong. Use something like 1-3,5." };
+    if (list.error) return { error: list.error };
+    const P = PAPERS[s.paper];
+    const landscape = s.orient === "auto" ? (s.nup === 2 ? !S.landscape : S.landscape) : s.orient === "landscape";
+    const W = landscape ? P[1] : P[0], H = landscape ? P[0] : P[1];
+    const cols = s.nup === 1 ? 1 : s.nup === 4 ? 2 : (landscape ? 2 : 1);
+    const rows = s.nup === 1 ? 1 : s.nup === 4 ? 2 : (landscape ? 1 : 2);
+    const g = { W, H, cols, rows, margin: s.margin, nup: s.nup, gap: s.nup > 1 ? 1 : 0 };
+    let one = [];
+    for (let i = 0; i < list.length; i += s.nup) one.push(list.slice(i, i + s.nup));
+    const duplex = s.sides !== "single";
+    if (duplex && one.length % 2) one.push([]);
+    const all = [];
+    if (!duplex) {
+      if (s.collate) for (let c = 0; c < s.copies; c++) all.push(...one);
+      else one.forEach((sh) => { for (let c = 0; c < s.copies; c++) all.push(sh); });
+    } else if (s.collate) {
+      for (let c = 0; c < s.copies; c++) all.push(...one);
+    } else {
+      for (let i = 0; i < one.length; i += 2) for (let c = 0; c < s.copies; c++) all.push(one[i], one[i + 1]);
+    }
+    const front = all.filter((_, i) => i % 2 === 0);
+    let back = all.filter((_, i) => i % 2 === 1);
+    if (s.reverse) back = back.slice().reverse();
+    return { s, list, g, all, front, back, duplex, paperCount: duplex ? all.length / 2 : all.length };
+  }
+
+  /* page rendering and caching */
+  async function renderPage(n) {
+    const page = await S.pdf.getPage(n);
+    const vp = page.getViewport({ scale: RS });
+    const c = document.createElement("canvas");
+    c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+    await page.render({ canvasContext: c.getContext("2d"), viewport: vp, background: "#ffffff" }).promise;
+    const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.9));
+    S.color[n] = URL.createObjectURL(blob);
+    c.width = c.height = 0; page.cleanup();
+  }
+  async function makeGray(n) {
+    const img = new Image(); img.src = S.color[n]; await img.decode();
+    const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0);
+    const d = ctx.getImageData(0, 0, c.width, c.height), p = d.data;
+    for (let i = 0; i < p.length; i += 4) { const y = (p[i] * 299 + p[i + 1] * 587 + p[i + 2] * 114) / 1000; p[i] = p[i + 1] = p[i + 2] = y; }
+    ctx.putImageData(d, 0, 0);
+    const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.9));
+    S.gray[n] = URL.createObjectURL(blob);
+    c.width = c.height = 0;
+  }
+  async function ensure(list, mono, token) {
+    const need = [...new Set(list)];
+    let done = 0;
+    $("#prep").classList.remove("hidden");
+    for (const n of need) {
+      if (token !== S.token) return false;
+      if (!S.color[n]) await renderPage(n);
+      if (mono && !S.gray[n]) await makeGray(n);
+      done++;
+      $("#prepText").textContent = `Preparing pages ${done} of ${need.length}`;
+      $("#prepBar").style.width = Math.round((done / need.length) * 100) + "%";
+    }
+    $("#prep").classList.add("hidden");
+    return token === S.token;
+  }
+
+  /* sheet DOM, same builder for preview and print */
+  function sheetEl(pages, g, mono, rot) {
+    const box = document.createElement("div");
+    box.className = "box" + (rot ? " rot" : "");
+    box.style.setProperty("--ar", `${g.W} / ${g.H}`);
+    box.style.setProperty("--wmm", g.W + "mm");
+    box.style.setProperty("--hmm", g.H + "mm");
+    const sheet = document.createElement("div");
+    sheet.className = "sheet";
+    sheet.style.setProperty("--m", g.margin / g.W);
+    sheet.style.setProperty("--cols", g.cols);
+    sheet.style.setProperty("--rows", g.rows);
+    sheet.style.setProperty("--gap", g.gap);
+    pages.forEach((n) => {
+      const cell = document.createElement("div"); cell.className = "cell";
+      const img = new Image(); img.alt = "Page " + n; img.src = (mono ? S.gray : S.color)[n];
+      cell.appendChild(img); sheet.appendChild(cell);
+    });
+    box.appendChild(sheet);
+    return box;
+  }
+
+  function drawPreview(p) {
+    preview.innerHTML = "";
+    const mono = p.s.color === "mono";
+    const MAXP = 24;
+    p.all.slice(0, MAXP).forEach((sh, i) => {
+      const fig = document.createElement("figure"); fig.className = "pcell";
+      const cap = document.createElement("figcaption");
+      cap.textContent = p.duplex ? `Paper ${Math.floor(i / 2) + 1}, ${i % 2 ? "back" : "front"}` : `Sheet ${i + 1}`;
+      fig.append(sheetEl(sh, p.g, mono, false), cap);
+      preview.appendChild(fig);
+    });
+    $("#more").textContent = p.all.length > MAXP ? `Showing the first ${MAXP} of ${p.all.length} sheets.` : "";
+  }
+
+  function updateUi(p) {
+    const s = p.s;
+    const manual = s.sides === "manual", duplexP = s.sides === "duplex";
+    $("#flipRow").classList.toggle("hidden", s.sides === "single");
+    $("#reverseRow").classList.toggle("hidden", !manual);
+    $("#printAll").classList.toggle("hidden", manual);
+    $("#printFront").classList.toggle("hidden", !manual);
+    $("#printBack").classList.toggle("hidden", !manual);
+    $("#hintManual").classList.toggle("hidden", !manual);
+    $("#hintDuplex").classList.toggle("hidden", !duplexP);
+    if (duplexP) $("#hintDuplexText").textContent = `In the print window, tick Two sided (or Print on both sides) and choose flip on ${s.flip} edge. Ferry cannot switch this on for you.`;
+    const bw = s.color === "mono" ? "black and white" : "color";
+    $("#summary").textContent = `${s.copies} ${s.copies === 1 ? "copy" : "copies"} · ${s.paper} · ${bw} · ${p.paperCount} ${p.paperCount === 1 ? "sheet" : "sheets"} of paper${s.pages ? " · pages " + s.pages : ""}`;
+  }
+
+  let timer = 0;
+  function schedule() { clearTimeout(timer); timer = setTimeout(refresh, 250); }
+  async function refresh() {
+    if (!S) return;
+    const token = ++S.token;
+    const p = plan();
+    ["printAll", "printFront", "printBack"].forEach((id) => { $("#" + id).disabled = true; });
+    if (p.error) { say(stMsg, "err", p.error); return; }
+    say(stMsg, "", "");
+    updateUi(p);
     try {
-      const url = URL.createObjectURL(await fetchPdf(current));
-      const fr = document.createElement("iframe");
-      fr.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0";
-      fr.src = url;
-      fr.onload = () => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch { window.open(url, "_blank"); } };
-      document.body.appendChild(fr);
-      setTimeout(() => { fr.remove(); URL.revokeObjectURL(url); }, 120000);
-      dlg.close();
-    } catch (err) { if (err instanceof AuthError) { dlg.close(); return authFail(); } say(dlgMsg, "err", "Could not open the file. " + err.message); }
-    finally { btn.disabled = false; btn.textContent = "Use browser print dialog"; }
+      const ok = await ensure(p.list, p.s.color === "mono", token);
+      if (!ok) return;
+    } catch (err) { say(stMsg, "err", "Could not prepare the pages. " + err.message); return; }
+    S.p = p;
+    drawPreview(p);
+    ["printAll", "printFront", "printBack"].forEach((id) => { $("#" + id).disabled = false; });
+  }
+
+  async function doPrint(sheets, rot, label) {
+    const p = S.p, mono = p.s.color === "mono";
+    printRoot.innerHTML = "";
+    sheets.forEach((sh) => printRoot.appendChild(sheetEl(sh, p.g, mono, rot)));
+    $("#pageStyle").textContent = `@page{size:${p.g.W}mm ${p.g.H}mm;margin:0}`;
+    await Promise.all([...printRoot.querySelectorAll("img")].map((i) => i.decode().catch(() => {})));
+    S.last = label;
+    window.print();
+  }
+  addEventListener("afterprint", () => {
+    printRoot.innerHTML = "";
+    if (!S || !S.last) return;
+    $("#delNow").classList.remove("hidden");
+    say(stMsg, "ok", S.last === "front"
+      ? "Front sides sent. Reload the printed stack, then press Print back sides."
+      : "Print window closed. If the pages came out right, delete the file from Ferry.");
+    S.last = "";
+  });
+  $("#printAll").addEventListener("click", () => doPrint(S.p.all, false, "all"));
+  $("#printFront").addEventListener("click", () => doPrint(S.p.front, false, "front"));
+  $("#printBack").addEventListener("click", () => doPrint(S.p.back, S.p.s.flip === "short", "back"));
+
+  async function openStudio(f) {
+    if (!window.pdfjsLib) { say(appMsg, "err", "The print engine did not load. Check the internet connection and refresh."); return; }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    closeStudio();
+    S = { file: f, token: 0, color: {}, gray: {}, pdf: null, total: 0, landscape: false, p: null, last: "" };
+    $("#stFile").textContent = f.name;
+    preview.innerHTML = ""; $("#more").textContent = "";
+    $("#prep").classList.remove("hidden"); $("#prepText").textContent = "Loading PDF…"; $("#prepBar").style.width = "0";
+    $("#delNow").classList.add("hidden"); say(stMsg, "", "");
+    $("#summary").textContent = "Preparing…";
+    ["printAll", "printFront", "printBack"].forEach((id) => { $("#" + id).disabled = true; });
+    studio.showModal();
+    const mine = S;
+    try {
+      const blob = await fetchPdf(f, (pr) => { $("#prepBar").style.width = Math.round(pr * 100) + "%"; });
+      const data = new Uint8Array(await blob.arrayBuffer());
+      const pdf = await pdfjsLib.getDocument({ data }).promise;
+      if (S !== mine) { pdf.destroy(); return; }
+      S.pdf = pdf; S.total = pdf.numPages;
+      const vp = (await pdf.getPage(1)).getViewport({ scale: 1 });
+      S.landscape = vp.width > vp.height;
+      $("#pages").placeholder = `All ${S.total} pages, or 1-3,5`;
+      refresh();
+    } catch (err) {
+      if (err instanceof AuthError) { studio.close(); return authFail(); }
+      const m = err && err.name === "PasswordException" ? "This PDF is password protected. Remove the password and upload it again." : "Could not open this PDF. " + (err.message || "");
+      say(stMsg, "err", m);
+      $("#prep").classList.add("hidden");
+    }
+  }
+  function closeStudio() {
+    if (studio.open) studio.close();
+    if (S) {
+      Object.values(S.color).concat(Object.values(S.gray)).forEach((u) => URL.revokeObjectURL(u));
+      try { S.pdf && S.pdf.destroy(); } catch {}
+      S = null;
+    }
+    preview.innerHTML = ""; printRoot.innerHTML = "";
+  }
+  $("#stClose").addEventListener("click", closeStudio);
+  studio.addEventListener("cancel", (e) => { e.preventDefault(); closeStudio(); });
+  studio.addEventListener("click", (e) => { if (e.target === studio) closeStudio(); });
+
+  $("#minus").addEventListener("click", () => { $("#copies").value = (Number($("#copies").value) || 1) - 1; clampCopies(); schedule(); });
+  $("#plus").addEventListener("click", () => { $("#copies").value = (Number($("#copies").value) || 1) + 1; clampCopies(); schedule(); });
+  settings.addEventListener("input", schedule);
+  settings.addEventListener("submit", (e) => e.preventDefault());
+
+  $("#delNow").addEventListener("click", async () => {
+    if (!S) return;
+    const f = S.file;
+    try { await api(`/files/${f.id}`, { method: "DELETE" }); closeStudio(); files = files.filter((x) => x.id !== f.id); renderFiles(); say(appMsg, "ok", f.name + " deleted from Ferry."); }
+    catch (err) { if (err instanceof AuthError) return authFail(); say(stMsg, "err", "Delete failed. " + err.message); }
   });
 
   if (pass) { api("/files").then(showApp).catch(() => { pass = ""; }); }
